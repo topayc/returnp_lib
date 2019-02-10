@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Built-By: topayc
+Class-Path: lib/commons-lang3-3.0.jar lib/json-simple-1.1.jar lib/axis
+ -1.4.jar lib/bcprov-jdk15-1.40.jar
+Build-Jdk: 1.8.0_191
+Created-By: Maven Integration for Eclipse
+Main-Class: theMainClass
+

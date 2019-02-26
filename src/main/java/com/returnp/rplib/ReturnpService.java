@@ -29,8 +29,8 @@ public class ReturnpService {
 	private static String ENDPOINT_DELETE_MEMBER = "/pointback/v1/api/delete_member";
 	private static String ENDPOINT_MODIFY_MEMBER = "/pointback/v1/api/modify_member";
 	private static String ENDPOINT_HANDLE_ACCUMULATE = "/pointback/v1/api/handle_accumulate";
-	private static String ENDPOINT_ACCUMULAGE_BY_PAN = "/pointback/v1/api/accumulage_by_pan";
-	private static String ENDPOINT_CANCEL_ACCUMULATE_BY_PAN = "/pointback/v1/api/cancel_accumulate_by_pan";
+	//private static String ENDPOINT_ACCUMULAGE_BY_PAN = "/pointback/v1/api/accumulage_by_pan";
+	//private static String ENDPOINT_CANCEL_ACCUMULATE_BY_PAN = "/pointback/v1/api/cancel_accumulate_by_pan";
 	private static String ENDPOINT_LANGS = "/pointback/v1/api/langs";
 	private static String ENDPOINT_GET_BANK_ACCOUNTS = "/pointback/v1/api/get_bank_accounts";
 	private static String ENDPOINT_REGISTER_BANK_ACCOUNT = "/pointback/v1/api/register_bank_account";
@@ -476,7 +476,6 @@ public class ReturnpService {
 		String result = this.httpGet(ReturnpService.ENDPOINT_GET_GPOINT_ACCUMULATE_HISTORY,params);
 		return result;
 	}
-	
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 이후 메서드는 위와 동일한 기능을 하되, 매개 변수 인자를 맵 형태가 아닌, 일반 인자의 형식으로 호출함 

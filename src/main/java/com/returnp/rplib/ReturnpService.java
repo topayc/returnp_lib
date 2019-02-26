@@ -375,7 +375,7 @@ public class ReturnpService {
 	 * @return
 	 * @throws Exception
 	 */
-	private String getPolicy(HashMap<String, Object> params) throws Exception {
+	public String getPolicy(HashMap<String, Object> params) throws Exception {
 		String result = this.httpGet(ReturnpService.ENDPOINT_GET_POLICY,params);
 		return result;
 	}

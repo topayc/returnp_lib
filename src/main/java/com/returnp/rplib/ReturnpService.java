@@ -22,10 +22,7 @@ import org.json.simple.parser.ParseException;
  * </br>
  * </br>
  * 객체 생성 방법 
- * <b><h1>
- *  ReturnpService returnpService = </br>
- *  	new ReturnpService("OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_DEVELOPE);
- * </h1></b>
+ * <b><h1> *  ReturnpService returnpService = new ReturnpService("온라인 가맹점 고유 번호", "API KEY", ReturnpService.SERVICE_MODE_DEVELOPE); </br> * </h1></b>
  * 
  * <b><h1>생성자 인자 설명</h1></b>
  * 
@@ -37,10 +34,8 @@ import org.json.simple.parser.ParseException;
  *   (초기 개발시 개발 모드로 테스트후 운영 모드로 변경) </br>
  *   
  * <b><h1> 사용 방법 - 나의 회원 리스트 가져오기  </h1></b></br>
- * 
- * ReturnpService returnpService = </br>
- * 		new ReturnpService("OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_DEVELOPE);
- * returnpService.getMyMembers("topayc@naver.com");</br>
+ * ReturnpService returnpService = new ReturnpService("온라인 가맹점 고유 번호", "API KEY", ReturnpService.SERVICE_MODE_DEVELOPE);</br>
+ * returnpService.getMyMembers("topayc@naver.com"); // 회원 정보 가져오기 </br>
  * 
  * String resultCode = null;</br>
  * String message = null;</br>

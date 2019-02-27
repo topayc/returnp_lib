@@ -17,9 +17,52 @@ import org.json.simple.parser.ParseException;
 
 
 /**
- * @author topayc
- *
+ * @version 1.0
+ * @date 2019-02-27
+ * @author 안영철
+ * 
+ * 객체 생성 방법 
+ * <b><h1>
+ *  ReturnpService returnpService = 
+ *  	new ReturnpService("OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_DEVELOPE);
+ * </h1></b>
+ * 
+ * <b><h1>생성자 인자 설명</h1></b>
+ * 
+ * 1.쇼핑몰 고유 번호 : 리턴포인트에서 생성 후 제공
+ * 2.API KEY : 리턴포인트에서 생성, 제공하며, 응답 데이타의 암, 복호화 및 클라이언트 식별에 사용
+ * 3.서비스 실행 모드 
+ *  - ReturnpService.SERVICE_MODE_DEVELOPE  :  <b>HTTP 로 개발 서버 접속</b>
+ *  - ReturnpService.SERVICE_MODE_PRODUCT   :  <b>HTTPS 로 실제 운영 서버 접속</b> 
+ *   (초기 개발시 개발 모드로 테스트후 운영 모드로 변경) 
+ *   
+ * <b><h1> 사용 방법 - 나의 회원 리스트 가져오기  </h1></b>
+ * 
+ * ReturnpService returnpService = 
+ * 		new ReturnpService("OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_DEVELOPE);
+ * returnpService.getMyMembers("topayc@naver.com");
+ * 
+ * String resultCode = null;
+ * String message = null;
+ * String total = null;
+ * String data = null;
+ * 
+ * if (returnpService.getResponseCode().equals(ReturnpService.RESPONSE_OK) {  // 서비스 연결과 처리상에서 에러가 없는 경우 
+ * 	 resultCode = returnpService.getResultCode();   // 일반적인 처리 성공일 경우 "100"을 반환
+ * 	 message = returnpService.getMessage();         // 처리 결과 메시지
+ * 	 total = returnpService.getTotal();                    // 배열 반환일 경우 해당 배열의 크기, 배열이 아닌 오브젝트 혹은 데이타가 없는 요청인 경우  -1 를 반환
+ * 	 data = returnpService.getData();                     // 실제 데이타 
+ * }
+ * 
+ * <b><h1> 서비스 요청에 대한 ResultCode(응답 코드)   </h1></b>
+ * 100 : 일반적인 요청 및 처리 성공 
+ * 550 : 클라이언트 식별 오류, 가맹점 고유 번호나 API KEY가 잘못된 경우
+ * 
+ * 
+ * 
+ * 
  */
+
 public class ReturnpService {
 	private static String ENDPOINT_SAVE_CACHE_DATA = "/pointback/v1/api/save_cache_data";
 	private static String ENDPOINT_GET_CACHE_DATA = "/pointback/v1/api/get_cache_data";
@@ -51,6 +94,9 @@ public class ReturnpService {
 	public static String SERVICE_MODE_DEVLOPEMENT = "DEVELOPEMENT";
 	public static String SERVICE_MODE_PRODUCT = "PRODUCT";
 	
+	public static String RESPONSE_OK = "1000";
+	public static String RESPONSE_ERROR = "2000";
+
 	private static String SERVICE_URL_LOCAL = "http://127.0.0.1:8080";
 	private static String SERVICE_URL_DEVLOPEMENT = "http://211.254.212.90:8083";
 	private static String SERVICE_URL_PRODUCT = "https://www.returnp.com:9094";
@@ -58,7 +104,8 @@ public class ReturnpService {
 	private String afId;
 	private String apiKey;
 	private String serviceMode ; 
-
+	private JSONObject result;
+	
 	public String getAfId() { return afId; }
 	public void setAfId(String afId) { this.afId = afId; }
 	public String getApiKey() { return apiKey; }
@@ -77,7 +124,7 @@ public class ReturnpService {
 	/**
 	 * 생성자
 	 * @param afId  리턴포인트에서 생성해서 제공하는 고유 번호
-	 * @param apiKey 리턴포인트에서 생성해서 제공하는 Api key (암복호호와 및 클라이언트 식별에 사용)
+	 * @param apiKey 리턴포인트에서 생성해서 제공하는 Api key (암복호화와 및 클라이언트 식별에 사용)
 	 * @param mode  실행 모드 DEVELOPEMENT : 개발 서버 연동, PRODUCT: 실제 운영 서버 연동 
 	 * 개발시에는 DEVELOPEMENT 로 테스트를 하고, 실제 배포시에는 PRODUCT로 하여 객체 생성
 	 */
@@ -110,6 +157,7 @@ public class ReturnpService {
 		return rootUrl;
 	}
 	private String httpPost(String endPoint, HashMap<String, Object> params) throws Exception {
+		this.result = null;
 		StringBuilder postData = new StringBuilder();
 		params.put("afId", this.afId);
 		for(Map.Entry<String,Object> param : params.entrySet()) {
@@ -120,7 +168,7 @@ public class ReturnpService {
 		}
 		
 		endPoint = this.getServiceUrl() + endPoint;
-		System.out.println("Api Call URL : " + endPoint);
+		//System.out.println("Api Call URL : " + endPoint);
 		
 		byte[] postDataBytes = postData.toString().getBytes("UTF-8");
 		URL url = new URL(endPoint); // 호출할 url
@@ -135,6 +183,7 @@ public class ReturnpService {
 	}
 	
 	private String httpGet(String endPoint, HashMap<String, Object> params) throws Exception {
+		this.result = null;
 		StringBuilder getData = new StringBuilder();
 		params.put("afId", this.afId);
 		for(Map.Entry<String,Object> param : params.entrySet()) {
@@ -145,7 +194,7 @@ public class ReturnpService {
 		}
 		
 		endPoint = this.getServiceUrl() + endPoint;
-		System.out.println("Api Call URL : " + endPoint);
+		//System.out.println("Api Call URL : " + endPoint);
 		
 		URL url = new URL(endPoint+ "?" + getData.toString());
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -158,20 +207,23 @@ public class ReturnpService {
 	private String decodeResponse(String response) throws UnsupportedEncodingException, ParseException {
 		JSONParser jsonParser = new JSONParser();
 		JSONObject json = (JSONObject) jsonParser.parse(response);
-		System.out.println("원문 Response");
-		System.out.println(json.toString());
+		//System.out.println("원문 Response");
+		//System.out.println(json.toString());
 		
 		if (json.get("data") != null ) {
 			json.put("data", Aes256Crypto.decode(BASE64Util.decodeString(json.get("data").toString()), this.apiKey));
 		}
 		
-		long total = (long)json.get("total");
-		System.out.println("total : "  + total);
-		System.out.println("복호화 Response");
-		System.out.println(json.toString());
-		System.out.println("DATA");
-		System.out.println(json.get("data"));
-		
+	/*	long total = -1;
+		if (json.get("total") != null ) {
+			total = (long)json.get("total");
+		}*/
+		//System.out.println("total : "  + total);
+		//System.out.println("복호화 Response");
+		//System.out.println(json.toString());
+		//System.out.println("DATA");
+		//System.out.println(json.get("data"));
+		this.result = json;
 		/*JSONParser parser= new JSONParser();
 		JSONObject dataJson = (JSONObject) parser.parse(json.get("data").toString());
 		System.out.println(dataJson.get("memberName").toString());*/
@@ -611,10 +663,10 @@ public class ReturnpService {
             param.put("memberPhone", memberPhone);
             return  this.executeAccumualte(param);
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -665,10 +717,10 @@ public class ReturnpService {
             response = this.registerBankAccount(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+           // System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -716,10 +768,10 @@ public class ReturnpService {
             response = this.deleteBankAccount(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -739,10 +791,10 @@ public class ReturnpService {
             response = this.getWithdrawalHistory(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+           // System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -766,10 +818,10 @@ public class ReturnpService {
             response = this.registerWithdrawal(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -791,10 +843,10 @@ public class ReturnpService {
             response = this.cancelWithdrawal(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -816,10 +868,10 @@ public class ReturnpService {
             response = this.deletelWithdrawal(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -845,10 +897,10 @@ public class ReturnpService {
             response = this.updatePointWithdrawal(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -869,10 +921,10 @@ public class ReturnpService {
             response = this.getMyMembers(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -893,10 +945,10 @@ public class ReturnpService {
             response = this.getMyPointInfos(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
@@ -923,19 +975,64 @@ public class ReturnpService {
             response = this.getMyGPointAccumuateHistory(param);
             return response;
         } catch (IOException e) {
-            System.out.println("*** IO 익셉션 발생");
+            //System.out.println("*** IO 익셉션 발생");
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println("*** ParseException 익셉션 발생");
+            //System.out.println("*** ParseException 익셉션 발생");
             e.printStackTrace();
         }
         return null;
     }
     
+    public String getContent() {
+    	return this.result.toString();
+    }
+    
+    public String getResponseCode() {
+    	if (this.result.get("responseCode") != null) {
+    		return this.result.get("responseCode").toString();
+    	}else {
+    		return null;
+    	}
+    }
+    
+    public String getResultCode() {
+    	if (this.result.get("resultCode") != null) {
+    		return this.result.get("resultCode").toString();
+    	}else {
+    		return null;
+    	}
+    }
+    
+    public String  getData() {
+    	if (this.result.get("data") != null) {
+    		return this.result.get("data").toString();
+    	}else {
+    		return null;
+    	}
+    }
+    
+    public String getMessage() {
+    	if (this.result.get("message") != null) {
+    		return this.result.get("message").toString();
+    	}else {
+    		return null;
+    	}
+    }
+    
+    public int getTotal() {
+    	if (this.result.get("total") != null) {
+    		return Integer.valueOf(this.result.get("total").toString());
+    	}else {
+    		return -1;
+    	}
+    }
+    
+    
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// API 테스트 메서드                                                                                                             
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
+	
 	public static void   callGetMemberInfo(ReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
@@ -967,15 +1064,15 @@ public class ReturnpService {
 		param.put("memberName", "안영철1000");
 		param.put("memberPhone", "01098227407");
 		param.put("memberPassword", "a9831000");
+		param.put("memberPassword2", "a9831000");
 		param.put("country", "KR");
 		param.put("recommenderEmail", "topayc1@naver.com");
 		response = returnpService.join(param);
 	}
 
 	public static String   callMemberJoin2(ReturnpService returnpService) throws Exception {
-		return returnpService.join("topayctopayc90901@naver.com", "안영철1000", "0103822747", "a9831000", "topayc1@naver.com");
+		return returnpService.join("topayctopayc90901@naver.com", "안영철", "0103822747", "a9831000", "a9831000","topayc1@naver.com");
 	}
-	
 	public static void   callDeleteMember(ReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
@@ -996,7 +1093,7 @@ public class ReturnpService {
 		response = returnpService.modifyMember(param);
 	}
 	public static String callModifyMember2(ReturnpService returnpService) throws Exception {
-		return returnpService.modifyMember("topayctopayc9090@naver.com", "a9831000", "01011111111", "KR", "topayc1@naver.com");
+		return returnpService.modifyMember("topayctopayc9090@naver.com", "a9831000","a9831000", "01011111111", "KR", "topayc1@naver.com");
 	}
 	
 
@@ -1242,65 +1339,76 @@ public class ReturnpService {
 		try {
 			ReturnpService returnpService = new ReturnpService(
 					"OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_LOCAL);
-			ReturnpService.callGetMemberInfo(returnpService);
-			ReturnpService.callGetMemberInfo2(returnpService);
-
-			ReturnpService.callIsRegistered(returnpService);
-			ReturnpService.callIsRegistered2(returnpService);
+			//ReturnpService.callGetMemberInfo(returnpService);
+			//ReturnpService.callGetMemberInfo2(returnpService);
 			
-			ReturnpService.callMemberJoin(returnpService);
-			ReturnpService.callMemberJoin2(returnpService);
+			//ReturnpService.callIsRegistered(returnpService);
+			//ReturnpService.callIsRegistered2(returnpService);
 			
-			ReturnpService.callDeleteMember(returnpService);
-			ReturnpService.callDeleteMember2(returnpService);
+			//ReturnpService.callMemberJoin(returnpService);
+			//ReturnpService.callMemberJoin2(returnpService);
 			
-			ReturnpService.callModifyMember(returnpService);
-			ReturnpService.callModifyMember2(returnpService);
+			//ReturnpService.callDeleteMember(returnpService);
+			//ReturnpService.callDeleteMember2(returnpService);
+			
+			//ReturnpService.callModifyMember(returnpService);
+			//ReturnpService.callModifyMember2(returnpService);
 
-			ReturnpService.callExecuteAccumlate(returnpService);
-			ReturnpService.callExecuteAccumlate2(returnpService);
+			//ReturnpService.callExecuteAccumlate(returnpService);
+			//ReturnpService.callExecuteAccumlate2(returnpService);
 
-			ReturnpService.callGetLangs(returnpService);
+			//ReturnpService.callGetLangs(returnpService);
 			ReturnpService.callGetLangs2(returnpService);
-
-			ReturnpService.callGetMemberBankAccounts(returnpService);
-			ReturnpService.callGetMemberBankAccounts2(returnpService);
+			//System.out.println("responseCode : " + returnpService.getResponseCode());
 			
-			ReturnpService.callRegisterBankAccount(returnpService);
-			ReturnpService.callRegisterBankAccount2(returnpService);
 
-			ReturnpService.callUpdateBankAccount(returnpService);
-			ReturnpService.callUpdateBankAccount2(returnpService);
+			//ReturnpService.callGetMemberBankAccounts(returnpService);
+			//ReturnpService.callGetMemberBankAccounts2(returnpService);
 			
-			ReturnpService.callDeleteBankAccount(returnpService);
-			ReturnpService.callDeleteBankAccount2(returnpService);
-			
-			ReturnpService.callgetWithdrawalHistory(returnpService);
-			ReturnpService.callgetWithdrawalHistory2(returnpService);
-			
-			ReturnpService.callRegisterWithdrawal(returnpService);
-			ReturnpService.callRegisterWithdrawal2(returnpService);
-			
-			ReturnpService.callCancelWithdrawal(returnpService);
-			ReturnpService.callCancelWithdrawal2(returnpService);
+			//ReturnpService.callRegisterBankAccount(returnpService);
+			//ReturnpService.callRegisterBankAccount2(returnpService);
 
-			ReturnpService.callDeleteWithdrawal(returnpService);
-			ReturnpService.callDeleteWithdrawal2(returnpService);
-
-			ReturnpService.callModifyWithdrawal(returnpService);
-			ReturnpService.callModifyWithdrawal2(returnpService);
-
-			ReturnpService.callGetMyMembers(returnpService);
-			ReturnpService.callGetMyMembers2(returnpService);
+			//ReturnpService.callUpdateBankAccount(returnpService);
+			//ReturnpService.callUpdateBankAccount2(returnpService);
 			
-			ReturnpService.callGetMyPointInfos(returnpService);
-			ReturnpService.callGetMyPointInfos2(returnpService);
+			//ReturnpService.callDeleteBankAccount(returnpService);
+			//ReturnpService.callDeleteBankAccount2(returnpService);
+			
+			//ReturnpService.callgetWithdrawalHistory(returnpService);
+			//ReturnpService.callgetWithdrawalHistory2(returnpService);
+			
+			//ReturnpService.callRegisterWithdrawal(returnpService);
+			//ReturnpService.callRegisterWithdrawal2(returnpService);
+			
+			//ReturnpService.callCancelWithdrawal(returnpService);
+			//ReturnpService.callCancelWithdrawal2(returnpService);
 
-			ReturnpService.callGetMyGPointAccumuateHistory(returnpService);
-			ReturnpService.callGetMyGPointAccumuateHistory2(returnpService);
+			//ReturnpService.callDeleteWithdrawal(returnpService);
+			//ReturnpService.callDeleteWithdrawal2(returnpService);
+
+			//ReturnpService.callModifyWithdrawal(returnpService);
+			//ReturnpService.callModifyWithdrawal2(returnpService);
+
+			//ReturnpService.callGetMyMembers(returnpService);
+			//ReturnpService.callGetMyMembers2(returnpService);
+			
+			//ReturnpService.callGetMyPointInfos(returnpService);
+			//ReturnpService.callGetMyPointInfos2(returnpService);
+
+			//ReturnpService.callGetMyGPointAccumuateHistory(returnpService);
+			//ReturnpService.callGetMyGPointAccumuateHistory2(returnpService);
+			
+			System.out.println("===========================================================");
+			System.out.println("content :" + returnpService.getContent());
+			System.out.println("responseCode: " + returnpService.getResponseCode());
+			System.out.println("resultCode: " + returnpService.getResultCode());
+			System.out.println("message : " + returnpService.getMessage());
+			System.out.println("total : " + returnpService.getTotal());
+			System.out.println("data : " + returnpService.getData());
+			System.out.println("===========================================================");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 }

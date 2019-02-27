@@ -23,44 +23,49 @@ import org.json.simple.parser.ParseException;
  * 
  * 객체 생성 방법 
  * <b><h1>
- *  ReturnpService returnpService = 
+ *  ReturnpService returnpService = </br>
  *  	new ReturnpService("OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_DEVELOPE);
  * </h1></b>
  * 
  * <b><h1>생성자 인자 설명</h1></b>
  * 
- * 1.쇼핑몰 고유 번호 : 리턴포인트에서 생성 후 제공
- * 2.API KEY : 리턴포인트에서 생성, 제공하며, 응답 데이타의 암, 복호화 및 클라이언트 식별에 사용
- * 3.서비스 실행 모드 
- *  - ReturnpService.SERVICE_MODE_DEVELOPE  :  <b>HTTP 로 개발 서버 접속</b>
- *  - ReturnpService.SERVICE_MODE_PRODUCT   :  <b>HTTPS 로 실제 운영 서버 접속</b> 
- *   (초기 개발시 개발 모드로 테스트후 운영 모드로 변경) 
+ * 1.쇼핑몰 고유 번호 : 리턴포인트에서 생성 후 제공</br>
+ * 2.API KEY : 리턴포인트에서 생성, 제공하며, 응답 데이타의 암, 복호화 및 클라이언트 식별에 사용</br>
+ * 3.서비스 실행 모드 </br>
+ *  - ReturnpService.SERVICE_MODE_DEVELOPE  :  <b>HTTP 로 개발 서버 접속</b></br>
+ *  - ReturnpService.SERVICE_MODE_PRODUCT   :  <b>HTTPS 로 실제 운영 서버 접속</b> </br>
+ *   (초기 개발시 개발 모드로 테스트후 운영 모드로 변경) </br>
  *   
- * <b><h1> 사용 방법 - 나의 회원 리스트 가져오기  </h1></b>
+ * <b><h1> 사용 방법 - 나의 회원 리스트 가져오기  </h1></b></br>
  * 
- * ReturnpService returnpService = 
+ * ReturnpService returnpService = </br>
  * 		new ReturnpService("OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_DEVELOPE);
- * returnpService.getMyMembers("topayc@naver.com");
+ * returnpService.getMyMembers("topayc@naver.com");</br>
  * 
- * String resultCode = null;
- * String message = null;
- * String total = null;
- * String data = null;
+ * String resultCode = null;</br>
+ * String message = null;</br>
+ * String total = null;</br>
+ * String data = null;</br>
  * 
- * if (returnpService.getResponseCode().equals(ReturnpService.RESPONSE_OK) {  // 서비스 연결과 처리상에서 에러가 없는 경우 
- * 	 resultCode = returnpService.getResultCode();   // 일반적인 처리 성공일 경우 "100"을 반환
- * 	 message = returnpService.getMessage();         // 처리 결과 메시지
- * 	 total = returnpService.getTotal();                    // 배열 반환일 경우 해당 배열의 크기, 배열이 아닌 오브젝트 혹은 데이타가 없는 요청인 경우  -1 를 반환
- * 	 data = returnpService.getData();                     // 실제 데이타 
+ * if (returnpService.getResponseCode().equals(ReturnpService.RESPONSE_OK) {  // 서비스 연결과 처리상에서 에러가 없는 경우 </br>
+ * 	 resultCode = returnpService.getResultCode();   // 일반적인 처리 성공일 경우 "100"을 반환</br>
+ * 	 message = returnpService.getMessage();         // 처리 결과 메시지</br>
+ * 	 total = returnpService.getTotal();                    // 배열 반환일 경우 해당 배열의 크기, 배열이 아닌 오브젝트 혹은 데이타가 없는 요청인 경우  -1 를 반환</br>
+ * 	 data = returnpService.getData();                     // 실제 데이타 , 배열 혹은 오브젝트 JSON 스트링으로 반화 </br>
  * }
  * 
- * <b><h1> 서비스 요청에 대한 ResultCode(응답 코드)   </h1></b>
- * 100 : 일반적인 요청 및 처리 성공 
- * 550 : 클라이언트 식별 오류, 가맹점 고유 번호나 API KEY가 잘못된 경우
+ * <b><h1> 서비스 요청에 대한 ResultCode(응답 코드)   </h1></b></br>
+ * 100 : 일반적인 요청에 대한 처리 성공 </br>
+ * 
+ * 300 : 요청에 대해서 수행할수 없음, 비즈니스 로직 처리 오류  </br>
+ * 301 : 잘못된 API key</br>
+ * 302 : 해당 이메일에 대한 회원이 존재하지 않음</br>
+ * 303 : 해당 요청값은 중복됨</br>
+ * 304 : 해당 요청값은 중복되지 않음</br>
+ * 305 : 잘못된 가맹 고유 번호, 해당 고유번호의 가맹점이 존재 하지 않음 </br>
  * 
  * 
- * 
- * 
+ * 500 : 서버 오류 </br>
  */
 
 public class ReturnpService {
@@ -204,6 +209,7 @@ public class ReturnpService {
 		return this.decodeResponse(response);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private String decodeResponse(String response) throws UnsupportedEncodingException, ParseException {
 		JSONParser jsonParser = new JSONParser();
 		JSONObject json = (JSONObject) jsonParser.parse(response);
@@ -738,7 +744,7 @@ public class ReturnpService {
      * @throws Exception
      */
     public String updateBankAccount(
-    		String memberEmail, int memberBankAccountNo, String bankName, String bankAccount, String accountOwner, String accountStaus) throws Exception  {
+    		String memberEmail, String memberBankAccountNo, String bankName, String bankAccount, String accountOwner, String accountStaus) throws Exception  {
     	 String response = null;
          HashMap<String, Object> param = new HashMap<String, Object>();
          param.put("memberEmail",  memberEmail);
@@ -808,7 +814,7 @@ public class ReturnpService {
      * @return
      * @throws Exception
      */
-    public String registerWithdrawal(String memberEmail, int memberBankAccountNo, int withdrawalAmount ) throws Exception  {
+    public String registerWithdrawal(String memberEmail, String memberBankAccountNo, int withdrawalAmount ) throws Exception  {
         try {
             String response = null;
             HashMap<String, Object> param = new HashMap<String, Object>();
@@ -834,7 +840,7 @@ public class ReturnpService {
      * @return
      * @throws Exception
      */
-    public String cancelWithdrawal(String memberEmail, int memberBankAccountNo) throws Exception  {
+    public String cancelWithdrawal(String memberEmail, String memberBankAccountNo) throws Exception  {
         try {
             String response = null;
             HashMap<String, Object> param = new HashMap<String, Object>();
@@ -859,7 +865,7 @@ public class ReturnpService {
      * @return
      * @throws Exception
      */
-    public String deletelWithdrawal(String memberEmail, int memberBankAccountNo) throws Exception  {
+    public String deletelWithdrawal(String memberEmail, String memberBankAccountNo) throws Exception  {
         try {
             String response = null;
             HashMap<String, Object> param = new HashMap<String, Object>();
@@ -886,7 +892,7 @@ public class ReturnpService {
      * @return
      * @throws Exception
      */
-    public String updatePointWithdrawal(String memeberEmail,int pointWithdrawalNo , int memberBankAccountNo, int withdrawalAmount  ) throws Exception  {
+    public String updatePointWithdrawal(String memeberEmail,String pointWithdrawalNo , String memberBankAccountNo, String withdrawalAmount  ) throws Exception  {
         try {
             String response = null;
             HashMap<String, Object> param = new HashMap<String, Object>();
@@ -963,7 +969,7 @@ public class ReturnpService {
      * @return
      * @throws Exception
      */
-    public String getMyGPointAccumuateHistory(String memberEmail, String searchDateMonth, int pageSize, int offset) throws Exception  {
+    public String getMyGPointAccumuateHistory(String memberEmail, String searchDateMonth, String pageSize, String offset) throws Exception  {
         //System.out.println("#### memberJoin");
         try {
             String response = null;
@@ -1033,7 +1039,7 @@ public class ReturnpService {
 	// API 테스트 메서드                                                                                                             
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public static void   callGetMemberInfo(ReturnpService returnpService) throws Exception {
+/*	public static void   callGetMemberInfo(ReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail", "topayc@naver.com");
@@ -1333,12 +1339,12 @@ public class ReturnpService {
 	public static String callGetMyGPointAccumuateHistory2(ReturnpService returnpService) throws Exception  {
 		return returnpService.getMyGPointAccumuateHistory("lih5026@naver.com", "2019-02-01 00:00:00", 10, 0);
 	}
+	*/
 	
-	
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		try {
 			ReturnpService returnpService = new ReturnpService(
-					"OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_LOCAL);
+					"OTID_1551081693681", "9c10c4a7a3ea445e8777b1973752643a", ReturnpService.SERVICE_MODE_DEVLOPEMENT);
 			//ReturnpService.callGetMemberInfo(returnpService);
 			//ReturnpService.callGetMemberInfo2(returnpService);
 			
@@ -1358,7 +1364,7 @@ public class ReturnpService {
 			//ReturnpService.callExecuteAccumlate2(returnpService);
 
 			//ReturnpService.callGetLangs(returnpService);
-			ReturnpService.callGetLangs2(returnpService);
+			//ReturnpService.callGetLangs2(returnpService);
 			//System.out.println("responseCode : " + returnpService.getResponseCode());
 			
 
@@ -1410,5 +1416,5 @@ public class ReturnpService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

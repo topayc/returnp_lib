@@ -58,12 +58,18 @@ import org.json.simple.parser.ParseException;
  * 303 : 해당 요청값은 중복됨</br>
  * 304 : 해당 요청값은 중복되지 않음</br>
  * 305 : 잘못된 가맹 고유 번호, 해당 고유번호의 가맹점이 존재 하지 않음 </br>
+ * 306 : 이메일이 중복됨  (회원 가입시 반환될 수 있음)
+ * 307 : 전화번호가 중복됨  (회원 가입시 반환될 수 있음)
+ * 602 : 파라미터로 전달된 전화번호와 실제 디비의 전화번호가 일치하지 않음. 
+ * 611 : 존재하지 않는 결제 내역에 대한 취소 요청 
+ * 606 : 이미 적립 처리가 완료된 결제 내역
+ * 619 : 등록되어 있지만 QR 적립이 가능한 가맹점이 아님
  * 
  * 
  * 500 : 서버 오류 </br>
  */
 
-public class ReturnpService {
+public class BaseReturnpService {
 	private static String ENDPOINT_SAVE_CACHE_DATA = "/pointback/v1/api/save_cache_data";
 	private static String ENDPOINT_GET_CACHE_DATA = "/pointback/v1/api/get_cache_data";
 	private static String ENDPOINT_GET_MEMBER_INFO = "/pointback/v1/api/get_member_info";
@@ -113,9 +119,9 @@ public class ReturnpService {
 	
 	public String getServiceMode() { return serviceMode; }
 	public void setServiceMode(String serviceMode) throws Exception {
-		if (serviceMode.equals(ReturnpService.SERVICE_MODE_DEVLOPEMENT) && 
-				serviceMode.equals(ReturnpService.SERVICE_MODE_PRODUCT) && 
-				serviceMode.equals(ReturnpService.SERVICE_MODE_LOCAL)) {
+		if (serviceMode.equals(BaseReturnpService.SERVICE_MODE_DEVLOPEMENT) && 
+				serviceMode.equals(BaseReturnpService.SERVICE_MODE_PRODUCT) && 
+				serviceMode.equals(BaseReturnpService.SERVICE_MODE_LOCAL)) {
 			throw new Exception("unsupported ServiceMode");
 		}
 		this.serviceMode = serviceMode;
@@ -128,11 +134,11 @@ public class ReturnpService {
 	 * @param mode  실행 모드 DEVELOPEMENT : 개발 서버 연동, PRODUCT: 실제 운영 서버 연동 
 	 * 개발시에는 DEVELOPEMENT 로 테스트를 하고, 실제 배포시에는 PRODUCT로 하여 객체 생성
 	 */
-	public ReturnpService(String afId, String apiKey, String mode){
+	public BaseReturnpService(String afId, String apiKey, String mode){
 		this.afId = afId;
 		this.apiKey = apiKey;
 		if (mode.trim().equals("") || mode == null) {
-			this.serviceMode = ReturnpService.SERVICE_MODE_DEVLOPEMENT;
+			this.serviceMode = BaseReturnpService.SERVICE_MODE_DEVLOPEMENT;
 		}else {
 			this.serviceMode = mode;
 		}
@@ -144,13 +150,13 @@ public class ReturnpService {
 	 */
 	private String getServiceUrl () throws Exception {
 		String rootUrl = null;
-		if (this.serviceMode.equals(ReturnpService.SERVICE_MODE_DEVLOPEMENT)) {
-			rootUrl = ReturnpService.SERVICE_URL_DEVLOPEMENT;
-		} else if (this.serviceMode.equals(ReturnpService.SERVICE_MODE_PRODUCT)) {
-			rootUrl = ReturnpService.SERVICE_URL_PRODUCT;
+		if (this.serviceMode.equals(BaseReturnpService.SERVICE_MODE_DEVLOPEMENT)) {
+			rootUrl = BaseReturnpService.SERVICE_URL_DEVLOPEMENT;
+		} else if (this.serviceMode.equals(BaseReturnpService.SERVICE_MODE_PRODUCT)) {
+			rootUrl = BaseReturnpService.SERVICE_URL_PRODUCT;
 		
-		} else if (this.serviceMode.equals(ReturnpService.SERVICE_MODE_LOCAL)) { 
-			rootUrl = ReturnpService.SERVICE_URL_LOCAL;
+		} else if (this.serviceMode.equals(BaseReturnpService.SERVICE_MODE_LOCAL)) { 
+			rootUrl = BaseReturnpService.SERVICE_URL_LOCAL;
 		} else {
 			throw new Exception("unsupported ServiceMode");
 		}
@@ -262,7 +268,7 @@ public class ReturnpService {
 	 * memberEmail : 회원 이메일
 	 */
 	private String getMemberInfo(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_MEMBER_INFO, params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_MEMBER_INFO, params);
 		return result;
 	}
 	
@@ -274,7 +280,7 @@ public class ReturnpService {
 	 * cacheData  저장할 테이타 
 	 * */
 	private String save_cache_data(HashMap<String, Object> params) throws Exception {
-		String result = this.httpPost(ReturnpService.ENDPOINT_SAVE_CACHE_DATA, params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_SAVE_CACHE_DATA, params);
 		return result;
 	}
 	
@@ -284,7 +290,7 @@ public class ReturnpService {
 	 * cacheKey 가져올 키 
 	 */
 	private String getDataCache(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_CACHE_DATA, params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_CACHE_DATA, params);
 		return result;
 	}
 	
@@ -295,7 +301,7 @@ public class ReturnpService {
 	 * memberEmail, memberPhone
 	 */
 	private String isRegistered(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_IS_REGISTERED, params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_IS_REGISTERED, params);
 		return result;
 	}
 
@@ -312,7 +318,7 @@ public class ReturnpService {
 	 * @throws Exception 
 	 */
 	private String join(HashMap<String, Object> params) throws Exception {
-		String result = this.httpPost(ReturnpService.ENDPOINT_JOIN_UP,params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_JOIN_UP,params);
 		return result;
 	}
 	
@@ -323,7 +329,7 @@ public class ReturnpService {
 	 * @throws Exception 
 	 */
 	private String deleteMember(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_DELETE_MEMBER,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_DELETE_MEMBER,params);
 		return result;
 	}
 	
@@ -341,7 +347,7 @@ public class ReturnpService {
 	 * @throws Exception 
 	 */
 	private String modifyMember(HashMap<String, Object> params) throws Exception {
-		String result = this.httpPost(ReturnpService.ENDPOINT_MODIFY_MEMBER,params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_MODIFY_MEMBER,params);
 		return result;
 	}
 	
@@ -362,7 +368,7 @@ public class ReturnpService {
 	private String executeAccumualte(HashMap<String, Object> params) throws Exception {
 		/*afId  세팅*/
 		params.put("afId", this.getAfId());
-		String result = this.httpPost(ReturnpService.ENDPOINT_HANDLE_ACCUMULATE , params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_HANDLE_ACCUMULATE , params);
 		return result;
 	}
 	
@@ -373,7 +379,7 @@ public class ReturnpService {
 	 * @throws Exception 
 	 */
 	private String getLangs(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_LANGS,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_LANGS,params);
 		return result;
 	}
 
@@ -384,7 +390,7 @@ public class ReturnpService {
 	 * @throws Exception 
 	 */
 	private String getMemberBankAccounts(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_BANK_ACCOUNTS,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_BANK_ACCOUNTS,params);
 		return result;
 	}
 
@@ -395,7 +401,7 @@ public class ReturnpService {
 	 * @throws Exception 
 	 */
 	private String registerBankAccount(HashMap<String, Object> params) throws Exception {
-		String result = this.httpPost(ReturnpService.ENDPOINT_REGISTER_BANK_ACCOUNT,params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_REGISTER_BANK_ACCOUNT,params);
 		return result;
 	}
 	
@@ -413,12 +419,12 @@ public class ReturnpService {
 	 * @throws Exception 
 	 */
 	private String updateBankAccount(HashMap<String, Object> params) throws Exception {
-		String result = this.httpPost(ReturnpService.ENDPOINT_UPDATE_BANK_ACCOUNT,params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_UPDATE_BANK_ACCOUNT,params);
 		return result;
 	}
 
 	private String deleteBankAccount(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_DELETE_BANK_ACCOUNT,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_DELETE_BANK_ACCOUNT,params);
 		return result;
 	}
 
@@ -430,7 +436,7 @@ public class ReturnpService {
 	 * @throws Exception
 	 */
 	public String getPolicy(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_POLICY,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_POLICY,params);
 		return result;
 	}
 
@@ -440,7 +446,7 @@ public class ReturnpService {
 	 * @return
 	 */
 	private String getRpointConversionHistory(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_RPOINT_CONVERSION_HISTORY,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_RPOINT_CONVERSION_HISTORY,params);
 		return result;
 	}
 
@@ -452,7 +458,7 @@ public class ReturnpService {
 	 * @return
 	 */
 	private String registerWithdrawal(HashMap<String, Object> params) throws Exception {
-		String result = this.httpPost(ReturnpService.ENDPOINT_REGISTER_WITHDRAWAL,params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_REGISTER_WITHDRAWAL,params);
 		return result;
 	}
 
@@ -461,7 +467,7 @@ public class ReturnpService {
 	 * memberEmail
 	 */
 	private String getWithdrawalHistory(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_WITHDRAWAL_HISTORY,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_WITHDRAWAL_HISTORY,params);
 		return result;
 	}
 	
@@ -472,7 +478,7 @@ public class ReturnpService {
 	 * pointWithdrawalNo
 	 */
 	private String cancelWithdrawal(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_CANCEL_WITHDRAWAL,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_CANCEL_WITHDRAWAL,params);
 		return result;
 	}
 
@@ -482,7 +488,7 @@ public class ReturnpService {
 	 * pointWithdrawalNo
 	 */
 	private String deletelWithdrawal(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_DELETE_WITHDRAWAL,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_DELETE_WITHDRAWAL,params);
 		return result;
 	}
 
@@ -494,7 +500,7 @@ public class ReturnpService {
 	 * withdrawalAmount
 	 */
 	private String updatePointWithdrawal(HashMap<String, Object> params) throws Exception {
-		String result = this.httpPost(ReturnpService.ENDPOINT_UPDATE_WITHDRAWAL,params);
+		String result = this.httpPost(BaseReturnpService.ENDPOINT_UPDATE_WITHDRAWAL,params);
 		return result;
 	}
 
@@ -505,7 +511,7 @@ public class ReturnpService {
 	 * @return
 	 */
 	private String getMyMembers(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_MY_MEMBERS,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_MY_MEMBERS,params);
 		return result;
 	}
 
@@ -516,7 +522,7 @@ public class ReturnpService {
 	 * @return
 	 */
 	private String getMyPointInfos(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_MY_POINT_INFOS,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_MY_POINT_INFOS,params);
 		return result;
 	}
 
@@ -527,7 +533,7 @@ public class ReturnpService {
 	 * @return
 	 */
 	private String getMyGPointAccumuateHistory(HashMap<String, Object> params) throws Exception {
-		String result = this.httpGet(ReturnpService.ENDPOINT_GET_GPOINT_ACCUMULATE_HISTORY,params);
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_GET_GPOINT_ACCUMULATE_HISTORY,params);
 		return result;
 	}
 	
@@ -1035,18 +1041,18 @@ public class ReturnpService {
 	// API 테스트 메서드                                                                                                             
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public static void   callGetMemberInfo(ReturnpService returnpService) throws Exception {
+	public static void   callGetMemberInfo(BaseReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
-		param.put("memberEmail", "topayc@naver.com");
+		param.put("memberEmail", "topayc1@naver.com");
 		response = returnpService.getMemberInfo(param);
 	}
 	
-	public static String   callGetMemberInfo2(ReturnpService returnpService) throws Exception {
+	public static String   callGetMemberInfo2(BaseReturnpService returnpService) throws Exception {
 		return returnpService.getMemberInfo("topayc1@naver.com");
 	}
 	
-	public static void   callIsRegistered(ReturnpService returnpService) throws Exception {
+	public static void   callIsRegistered(BaseReturnpService returnpService) throws Exception {
 		System.out.println("#### getMemberBankAccounts");
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
@@ -1055,11 +1061,11 @@ public class ReturnpService {
 		response = returnpService.isRegistered(param);
 	}
 	
-	public static String   callIsRegistered2(ReturnpService returnpService) throws Exception {
+	public static String   callIsRegistered2(BaseReturnpService returnpService) throws Exception {
 		return returnpService.isRegistered("phone", "0108822747");
 	}
 	
-	public static void   callMemberJoin(ReturnpService returnpService) throws Exception {
+	public static void   callMemberJoin(BaseReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail", "topayc90010@naver.com");
@@ -1072,21 +1078,21 @@ public class ReturnpService {
 		response = returnpService.join(param);
 	}
 
-	public static String   callMemberJoin2(ReturnpService returnpService) throws Exception {
+	public static String   callMemberJoin2(BaseReturnpService returnpService) throws Exception {
 		return returnpService.join("topayctopayc90901@naver.com", "안영철", "0103822747", "a9831000", "a9831000","topayc1@naver.com");
 	}
-	public static void   callDeleteMember(ReturnpService returnpService) throws Exception {
+	public static void   callDeleteMember(BaseReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail", "topayc9000@naver.com");
 		response = returnpService.deleteMember(param);
 	}
 
-	public static String callDeleteMember2(ReturnpService returnpService) throws Exception {
+	public static String callDeleteMember2(BaseReturnpService returnpService) throws Exception {
 		return returnpService.deleteMember("topayctopayc90901@naver.com");
 	}
 
-	public static void   callModifyMember(ReturnpService returnpService) throws Exception {
+	public static void   callModifyMember(BaseReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail", "topayc10000@naver.com");
@@ -1094,12 +1100,12 @@ public class ReturnpService {
 		param.put("country", "US");
 		response = returnpService.modifyMember(param);
 	}
-	public static String callModifyMember2(ReturnpService returnpService) throws Exception {
+	public static String callModifyMember2(BaseReturnpService returnpService) throws Exception {
 		return returnpService.modifyMember("topayctopayc9090@naver.com", "a9831000","a9831000", "01011111111", "KR", "topayc1@naver.com");
 	}
 	
 
-	public static void   callExecuteAccumlate(ReturnpService returnpService) throws Exception  {
+	public static void   callExecuteAccumlate(BaseReturnpService returnpService) throws Exception  {
 		try {
 			String response = null;
 			HashMap<String, Object> param = new HashMap<String, Object>();
@@ -1120,7 +1126,7 @@ public class ReturnpService {
 		}
 	}
 	
-	public static String   callExecuteAccumlate2(ReturnpService returnpService) throws Exception  {
+	public static String   callExecuteAccumlate2(BaseReturnpService returnpService) throws Exception  {
 		return  returnpService.executeAccumualte(
 			"topayctopayc9090@naver.com",
 			"01011111111",
@@ -1130,7 +1136,7 @@ public class ReturnpService {
 			"44444444");
 	}
 	
-	public static void   callGetLangs(ReturnpService returnpService) throws Exception  {
+	public static void   callGetLangs(BaseReturnpService returnpService) throws Exception  {
 		//System.out.println("#### memberJoin");
 		try {
 			String response = null;
@@ -1145,11 +1151,11 @@ public class ReturnpService {
 		}
 	}
 	
-	public static String callGetLangs2(ReturnpService returnpService) throws Exception  {
+	public static String callGetLangs2(BaseReturnpService returnpService) throws Exception  {
 		return returnpService.getLangs();
 	}
 	
-	public static void callGetMemberBankAccounts(ReturnpService returnpService) throws Exception  {
+	public static void callGetMemberBankAccounts(BaseReturnpService returnpService) throws Exception  {
 		try {
 			String response = null;
 			HashMap<String, Object> param = new HashMap<String, Object>();
@@ -1164,11 +1170,11 @@ public class ReturnpService {
 		}
 	}
 
-	public static String callGetMemberBankAccounts2(ReturnpService returnpService) throws Exception  {
+	public static String callGetMemberBankAccounts2(BaseReturnpService returnpService) throws Exception  {
 		return returnpService.getMemberBankAccounts("topayc1@naver.com");
 	}
 	
-	public static void   callRegisterBankAccount(ReturnpService returnpService) throws Exception  {
+	public static void   callRegisterBankAccount(BaseReturnpService returnpService) throws Exception  {
 		try {
 			String response = null;
 			HashMap<String, Object> param = new HashMap<String, Object>();
@@ -1186,7 +1192,7 @@ public class ReturnpService {
 			e.printStackTrace();
 		}
 	}
-	public static String callRegisterBankAccount2(ReturnpService returnpService) throws Exception  {
+	public static String callRegisterBankAccount2(BaseReturnpService returnpService) throws Exception  {
 		return returnpService.registerBankAccount(
 				"topayc1@naver.com",
 				"신한은행222",
@@ -1195,7 +1201,7 @@ public class ReturnpService {
 		);
 	}
 	
-	public static void  callUpdateBankAccount(ReturnpService returnpService) throws Exception  {
+	public static void  callUpdateBankAccount(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
@@ -1207,7 +1213,7 @@ public class ReturnpService {
 		response = returnpService.updateBankAccount(param);
 	}
 
-	public static String callUpdateBankAccount2(ReturnpService returnpService) throws Exception  {
+	public static String callUpdateBankAccount2(BaseReturnpService returnpService) throws Exception  {
 	/*	return returnpService.updateBankAccount(
 			"topayc1@naver.com",
 			708,
@@ -1219,7 +1225,7 @@ public class ReturnpService {
 		return null;
 		
 	}
-	public static void   callDeleteBankAccount(ReturnpService returnpService) throws Exception  {
+	public static void   callDeleteBankAccount(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
@@ -1227,24 +1233,24 @@ public class ReturnpService {
 		response = returnpService.deleteBankAccount(param);
 	}
 	
-	public static String callDeleteBankAccount2(ReturnpService returnpService) throws Exception  {
+	public static String callDeleteBankAccount2(BaseReturnpService returnpService) throws Exception  {
 		return returnpService.deleteBankAccount("topayc1@naver.com","708");
 	}
 	
 	
-	public static void   callgetWithdrawalHistory(ReturnpService returnpService) throws Exception  {
+	public static void   callgetWithdrawalHistory(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
 		response = returnpService.getWithdrawalHistory(param);
 	}
 	
-	public static String callgetWithdrawalHistory2(ReturnpService returnpService) throws Exception  {
+	public static String callgetWithdrawalHistory2(BaseReturnpService returnpService) throws Exception  {
 		return returnpService.getWithdrawalHistory("topayc1@naver.com");
 	}
 	
 	
-	public static void   callRegisterWithdrawal(ReturnpService returnpService) throws Exception  {
+	public static void   callRegisterWithdrawal(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
@@ -1253,13 +1259,13 @@ public class ReturnpService {
 		response = returnpService.registerWithdrawal(param);
 	}
 	
-	public static String callRegisterWithdrawal2(ReturnpService returnpService) throws Exception  {
+	public static String callRegisterWithdrawal2(BaseReturnpService returnpService) throws Exception  {
 	/*	return returnpService.registerWithdrawal("topayc1@naver.com", 707, 20000);*/
 		return null;
 	}
 	
 
-	public static void   callCancelWithdrawal(ReturnpService returnpService) throws Exception  {
+	public static void   callCancelWithdrawal(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
@@ -1267,13 +1273,13 @@ public class ReturnpService {
 		response = returnpService.cancelWithdrawal(param);
 	}
 	
-	public static String callCancelWithdrawal2(ReturnpService returnpService) throws Exception  {
+	public static String callCancelWithdrawal2(BaseReturnpService returnpService) throws Exception  {
 		//return returnpService.cancelWithdrawal("topayc1@naver.com", 149);
 		return null;
 	}
 	
 	
-	public static void   callDeleteWithdrawal(ReturnpService returnpService) throws Exception  {
+	public static void   callDeleteWithdrawal(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
@@ -1281,13 +1287,13 @@ public class ReturnpService {
 		response = returnpService.deletelWithdrawal(param);
 	}
 	
-	public static String callDeleteWithdrawal2(ReturnpService returnpService) throws Exception  {
+	public static String callDeleteWithdrawal2(BaseReturnpService returnpService) throws Exception  {
 		//return returnpService.deletelWithdrawal("topayc1@naver.com", 149);
 		return null;
 	}
 	
 	
-	public static void   callModifyWithdrawal(ReturnpService returnpService) throws Exception  {
+	public static void   callModifyWithdrawal(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
@@ -1297,37 +1303,37 @@ public class ReturnpService {
 		response = returnpService.updatePointWithdrawal(param);
 	}
 	
-	public static String   callModifyWithdrawal2(ReturnpService returnpService) throws Exception  {
+	public static String   callModifyWithdrawal2(BaseReturnpService returnpService) throws Exception  {
 		//return  returnpService.updatePointWithdrawal("topayc1@naver.com", 1, 518, 200000);
 		return null;
 	}
 
 	
-	public static void   callGetMyMembers(ReturnpService returnpService) throws Exception  {
+	public static void   callGetMyMembers(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "topayc1@naver.com");
 		response = returnpService.getMyMembers(param);
 	}
 	
-	public static String callGetMyMembers2(ReturnpService returnpService) throws Exception  {
+	public static String callGetMyMembers2(BaseReturnpService returnpService) throws Exception  {
 		return returnpService.getMyMembers("topayc1@naver.com");
 	}
 	
-	public static void   callGetMyPointInfos(ReturnpService returnpService) throws Exception  {
+	public static void   callGetMyPointInfos(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "lih5026@naver.com");
 		response = returnpService.getMyPointInfos(param);
 	}
 	
-	public static String callGetMyPointInfos2(ReturnpService returnpService) throws Exception  {
+	public static String callGetMyPointInfos2(BaseReturnpService returnpService) throws Exception  {
 		return returnpService.getMyPointInfos("topayc1@naver.com");
 	}
 	
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	
-	public static void   callGetMyGPointAccumuateHistory(ReturnpService returnpService) throws Exception  {
+	public static void   callGetMyGPointAccumuateHistory(BaseReturnpService returnpService) throws Exception  {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("memberEmail",  "lih5026@naver.com");
@@ -1337,7 +1343,7 @@ public class ReturnpService {
 		response = returnpService.getMyGPointAccumuateHistory(param);
 	}
 	
-	public static String callGetMyGPointAccumuateHistory2(ReturnpService returnpService) throws Exception  {
+	public static String callGetMyGPointAccumuateHistory2(BaseReturnpService returnpService) throws Exception  {
 		//return returnpService.getMyGPointAccumuateHistory("lih5026@naver.com", "2019-02-01 00:00:00", 10, 0);
 		return null;
 	}
@@ -1345,10 +1351,23 @@ public class ReturnpService {
 	
 	public static void main(String[] args) {
 		try {
-			ReturnpService returnpService = new ReturnpService(
-					"999999", "eef1e3a8ecd94e799bf938a34af0f612", ReturnpService.SERVICE_MODE_LOCAL);
-			ReturnpService.callGetMemberInfo(returnpService);
+			BaseReturnpService returnpService = new BaseReturnpService(
+					"99", "8151c870dd4a4b02a5561e183449aaf0", BaseReturnpService.SERVICE_MODE_LOCAL);
+			
+			//returnpService.getMemberInfo("topayc@naver.com");
+			//returnpService.getMyPointInfos("topayc1@naver.com");
 			//ReturnpService.callGetMemberInfo2(returnpService);
+			//returnpService.isRegistered("phone", "0108822747");
+			//returnpService.join("topayc112121@naver.com", "안영철", "01088229967", "a9831000", "a9831000","topayc1@naver.com");
+			returnpService.executeAccumualte(
+					"topayc1@naver.com",
+					"01088227400",
+					"44444444",
+					"1",
+					"2019-03-01 10:10:10",
+					"44444444");
+			
+			
 			
 			//ReturnpService.callIsRegistered(returnpService);
 			//ReturnpService.callIsRegistered2(returnpService);
@@ -1407,12 +1426,26 @@ public class ReturnpService {
 			//ReturnpService.callGetMyGPointAccumuateHistory2(returnpService);
 			
 			System.out.println("===========================================================");
-			System.out.println("content :" + returnpService.getContent());
-			System.out.println("responseCode: " + returnpService.getResponseCode());
-			System.out.println("resultCode: " + returnpService.getResultCode());
-			System.out.println("message : " + returnpService.getMessage());
-			System.out.println("total : " + returnpService.getTotal());
-			System.out.println("data : " + returnpService.getData());
+			//System.out.println("orginal String" + returnpService.getContent());
+			System.out.println("===========================================================");
+			System.out.println(">> content");
+			System.out.println(returnpService.getContent());
+			System.out.println();
+			System.out.println(">> responseCode");
+			System.out.println(returnpService.getResponseCode());
+			System.out.println();
+			System.out.println(">> resultCode");
+			System.out.println(returnpService.getResultCode());
+			System.out.println();
+			System.out.println(">> message ");
+			System.out.println(returnpService.getMessage());
+			System.out.println();
+			System.out.println(">> total" );
+			System.out.println(returnpService.getTotal());
+			System.out.println();
+			System.out.println(">> data ");
+			System.out.println(returnpService.getData());
+			System.out.println();
 			System.out.println("===========================================================");
 			
 		} catch (Exception e) {

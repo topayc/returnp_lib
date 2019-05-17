@@ -1,0 +1,162 @@
+사용법 예)
+
+ ReturnpService returnpService = new ReturnpService("온라인 가맹점 고유 번호", "API KEY", ReturnpService.SERVICE_MODE_DEVELOPE);</br>
+ returnpService.getMyMembers("topayc@naver.com"); // 회원 정보 가져오기 </br>
+ 
+ String resultCode = null;</br>
+ String message = null;</br>
+ String total = null;</br>
+ String data = null;</br>
+ 
+ if (returnpService.getResponseCode().equals(ReturnpService.RESPONSE_OK) {  // 서비스 연결과 처리상에서 에러가 없는 경우 </br>
+ 	resultCode = returnpService.getResultCode();   // 일반적인 처리 성공일 경우 "100"을 반환</br>
+ 	message = returnpService.getMessage();         // 처리 결과 메시지</br>
+ 	total = returnpService.getTotal();                    // 배열 반환일 경우 해당 배열의 크기, 배열이 아닌 오브젝트 혹은 데이타가 없는 요청인 경우  -1 를 반환</br>
+ 	data = returnpService.getData();                     // 실제 데이타 , 배열 혹은 오브젝트 JSON 스트링으로 반화 </br>
+ }
+
+이후 data 는 아래의 호출 api 에 따라 아래 설명한 Format 으로 구성됩니다.
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# returnpService.getResultCode() 에서 반환한는 코드 값 설명
+
+ * 100 : 일반적인 요청에 대한 처리 성공 </br>
+ * 300 : 요청에 대해서 수행할수 없음, 비즈니스 로직 처리 오류  </br>
+ * 301 : 잘못된 API key</br>
+ * 302 : 해당 이메일에 대한 회원이 존재하지 않음</br>
+ * 303 : 해당 요청값은 중복됨</br>
+ * 304 : 해당 요청값은 중복되지 않음</br>
+ * 305 : 잘못된 가맹 고유 번호, 해당 고유번호의 가맹점이 존재 하지 않음 </br>
+ * 306 : 이메일이 중복됨  (회원 가입시 반환될 수 있음)
+ * 307 : 전화번호가 중복됨  (회원 가입시 반환될 수 있음)
+ * 602 : 파라미터로 전달된 전화번호와 실제 디비의 전화번호가 일치하지 않음. 
+ * 611 : 존재하지 않는 결제 내역에 대한 취소 요청 
+ * 606 : 이미 적립 처리가 완료된 결제 내역
+ * 619 : 등록되어 있지만 QR 적립이 가능한 가맹점이 아님
+
+
+아래의 결과값에 대한 설명은 실제 api 호출을 한 후 
+returnpService.getData()를 호출해서 받은 최종 데이타에 대한 Json String 결과값에 대한 설명입니ㅏㄷ.
+실제 해당 메서드를 호출할 때의 메서드에 넘겨지는 파라메터 값은 API 문서를 참조하시기 바랍니다.
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# returnpService.getMemberInfo() 호출 후 결과 값
+- 회원 정보를 가져옴 
+resultCode 100  :  조회 성공
+
+{
+  "isSoleDist": "N",                     			// 총판 여부 
+  "isBranch": "N",                                 // 지점 여부 
+  "isAgency": "N",                 				// 대리점 여부 
+  "isAffiliate": "N",								// 협력 업체 여부 
+  "isRecommender": "N",                       // 정회원 여부 
+  "memberName": "깅홍철",          			// 이름
+  "memberEmail": "topayc@naver.com",	// 이메일
+  "greenPointAccStatus": "Y",					// G POINT 적립 가능 여부 
+  "greenPointUseStatus": "Y",  				// GPOINT 사용 가능 여부 
+  "greenPointAmount": 9569.4,   			// GPOINT 금액
+  "redPointAccStatus": "Y",			    		// RPOINT 적립 가능 여부 
+  "redPointUseStatus": "Y", 					// RPOINT 사용 가능 여부            
+  "redPointAmount": 430.6,                   // R POINT 금액 
+  "memberNo": 600,							    // 회원 번호
+  "memberPhone": "+821088227467",    // 전화번호
+  "createTime": 1544002696000,            // 등록 시간 
+  "updateTime": 1544002696000,  			// 수정 시간 
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## returnpService.getMyPointInfos()
+회원의 포인트 정보를 객체 배열로 반환
+
+포인트 타입은 소비자로서의 일반 회원 포인트, 협력업체 포인트, 대리점 포인트 , 지사 포인트, 지점 포인트, 총판 포인트
+등이 있으며 일반 회원의 위에 나열된 모든 포인트타입을 다 가질 수 있음
+회원은 필수적으로 일반 회원 포인트를 가지요, 회원이 협력업체, 총판의 자격을 취득하면, 각각의 포인트가 별도로 생성됨 
+
+ 100  :  조회 성공
+
+[
+  {
+    "memberNo": 73,										// 회원 번호
+    "pointTypeKr": "협력업체 G-POINT",   			// 포인트 타입 한글
+    "pointTypeEn": "affiliate G-POINT",     			// 포인트 타입 영문
+    "pointAmount": 0.0,                        			// 포인트 금액
+    "memberName": "안영철",               			// 회원 이름
+    "pointType": "G-POINT",                   			// 포인트 타입 G-point 
+    "pointTarget": "affiliate",                  			// 협력업체 포인트를 의미  
+    "memberEmail": "topayc1@naver.com"       // 이메일
+  },
+  {
+    "memberNo": 73,										//회원 번호
+    "pointTypeKr": "회원 G-POINT",					// 포인트 타입 한글
+    "pointTypeEn": "member G-POINT",			// 포인트 타입 영문
+    "pointAmount": 300000.0,						// 포인트 금액
+    "memberName": "안영철",
+    "pointType": "G-POINT",							// 포인트 타입 G-point 
+    "pointTarget": "member",							// 일반 회원 포인트를 의미  
+    "memberEmail": "topayc1@naver.com"		// 메일 
+  }
+]
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## returnpService.isRegistered() 
+특정 타입의 특정 값이 중복이 되었는지 확인
+ 
+ 303 : 해당 요청값은 중복됨
+ 304 : 해당 요청값은 중복되지 않음
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## returnpService.join();
+리턴포인트 회원 가입 요청 
+
+ returnpService.getResultCode() 이 306인 경우 이메일 중복 으로 회원 가입 불가
+ returnpService.getResultCode() 이 307인 경우 전화번호 중복으로 회원 가입으로 불가
+ 위의 두가지 경우나 혹은 가입이 어떠한 이유로 실패한 경우는 getData()는 null 을 반환 
+ 정상적으로 가입이 되었을 경우 아래 값 반환
+ 
+ returnpService.getMemberInfo() 호출 결과가 동일하기 때문에 설명 생략
+ 
+ 100  :  가입 요청 성공 
+ 306  : 이메일 중복 으로 회원 가입 불가
+ 307  : 전화번호 중복으로 회원 가입으로 불가
+
+-306, 306  두가지 경우나 혹은 가입이 어떠한 이유로 실패한 경우는 getData()는 null 을 반환 
+ 정상적으로 가입이 되었을 경우 아래 값 반환
+
+ {
+  "greenPointUseStatus": "Y",
+  "isAgency": "N",
+  "greenPointAmount": 0.0,
+  "isSoleDist": "N",
+  "memberName": "안영철",
+  "redPointAccStatus": "Y",
+  "updateTime": 1558078542000,
+  "redPointUseStatus": "Y",
+  "isAffiliate": "N",
+  "memberEmail": "topayc112121@naver.com",
+  "isBranch": "N",
+  "memberNo": 32921,
+  "memberPhone": "01088229967",
+  "greenPointAccStatus": "Y",
+  "createTime": 1558078542000,
+  "isRecommender": "N",
+  "redPointAmount": 0.0,
+  "recommenderNo": 73
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## 	returnpService.executeAccumualte();
+적립 요청 
+100 : 적립 완료 혹은 적립 취소 완료 
+302  : 해당 이메일의 회원이 존재하지 않음 
+602 : 파라미터로 전달된 전화번호와 실제 디비의 전화번호가 일치하지 않음. 
+611 : 존재하지 않는 결제 내역에 대한 취소 요청 
+606 : 이미 적립 처리가 완료된 결제 내역
+619 : 등록되어 있지만 QR 적립이 가능한 가맹점이 아님
+
+
+
+

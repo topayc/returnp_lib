@@ -705,12 +705,12 @@ public class BaseReturnpService {
     	}
     }
 	
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		try {
 			BaseReturnpService returnpService = new BaseReturnpService(
-					"99", "4f017511bea34bf1aabd500032456a87", BaseReturnpService.SERVICE_MODE_LOCAL);
+					"A909010", "ea7bc4e2bffc42169adb944d5f39bb22", BaseReturnpService.SERVICE_MODE_DEVLOPEMENT);
 			
-			//returnpService.getMemberInfo("topayc@naver.com");
+			returnpService.getMemberInfo("topayc1@naver.com");
 			//returnpService.getMyPointInfos("topayc1@naver.com");
 			//ReturnpService.callGetMemberInfo2(returnpService);
 			//returnpService.isRegistered("phone", "0108822747");
@@ -750,5 +750,5 @@ public class BaseReturnpService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

@@ -580,7 +580,7 @@ public class BaseReturnpService {
      * @return
      * @throws Exception
      */
-    public String   join(String memberEmail, String memberName, String memberPhone, String memberPassword,String memberPassword2, String recommenderEmail) throws Exception {
+    public String   join(String memberEmail, String memberName, String memberPhone, String memberPassword,String memberPassword2, String recommenderEmail, String joinRoute) throws Exception {
         HashMap<String, Object> param = new HashMap<String, Object>();
         param.put("memberEmail", memberEmail);
         param.put("memberName", memberName);
@@ -591,6 +591,7 @@ public class BaseReturnpService {
         if (recommenderEmail != null && !recommenderEmail.trim().equals("")) {
             param.put("recommenderEmail", recommenderEmail);
         }
+        param.put("joinrout", joinRoute);
         return  this.join(param);
     }
 

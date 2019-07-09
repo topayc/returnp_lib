@@ -234,8 +234,6 @@ class ReturnpService {
         $param['paymentApprovalNumber'] = $paymentApprovalNumber;
         $param['memberEmail'] = $memberEmail;
         $param['memberPhone'] = $memberPhone;
-        $param['afId'] = $this -> afId;
-
         $result = $this -> get($this ->ENDPOINT_HANDLE_ACCUMULATE, $param);
         return $result;
     }

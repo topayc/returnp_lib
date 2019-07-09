@@ -214,7 +214,7 @@ class ReturnpService {
         if ($recommenderEmail) {
             $param['recommenderEmail'] = "recommenderEmail";
         }
-        $result = $this -> get($this ->ENDPOINT_JOIN_UP, $param);
+        $result = $this -> post($this ->ENDPOINT_JOIN_UP, $param);
         return $result;
     }
 

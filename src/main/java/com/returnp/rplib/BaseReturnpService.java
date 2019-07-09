@@ -591,7 +591,7 @@ public class BaseReturnpService {
         if (recommenderEmail != null && !recommenderEmail.trim().equals("")) {
             param.put("recommenderEmail", recommenderEmail);
         }
-        param.put("joinrout", joinRoute);
+        param.put("joinRoute", joinRoute);
         return  this.join(param);
     }
 
@@ -705,12 +705,12 @@ public class BaseReturnpService {
     	}
     }
 	
-	/*public static void main(String[] args) {
+	public static void main(String[] args) {
 		try {
 			BaseReturnpService returnpService = new BaseReturnpService(
-					"A909010", "ea7bc4e2bffc42169adb944d5f39bb22", BaseReturnpService.SERVICE_MODE_DEVLOPEMENT);
+					"22222222", "2eff27c0760540ca98a5463dcb07cb3b", BaseReturnpService.SERVICE_MODE_LOCAL);
 			
-			returnpService.getMemberInfo("topayc1@naver.com");
+			/*returnpService.getMemberInfo("topayc1@naver.com");*/
 			//returnpService.getMyPointInfos("topayc1@naver.com");
 			//ReturnpService.callGetMemberInfo2(returnpService);
 			//returnpService.isRegistered("phone", "0108822747");
@@ -718,37 +718,28 @@ public class BaseReturnpService {
 			returnpService.executeAccumualte(
 				"topayc1@naver.com",
 				"01088227467",
-				"44444444",
-				"1",
+				"1000000",
+				"0",
 				"2019-03-01 10:10:10",
 				"44444444");
 
 			
-			System.out.println("===========================================================");
 			//System.out.println("orginal String" + returnpService.getContent());
-			System.out.println("===========================================================");
-			System.out.println(">> content");
+			System.out.println(">>content");
 			System.out.println(returnpService.getContent());
-			System.out.println();
-			System.out.println(">> responseCode");
+			System.out.println(">>responseCode");
 			System.out.println(returnpService.getResponseCode());
-			System.out.println();
-			System.out.println(">> resultCode");
+			System.out.println(">>resultCode");
 			System.out.println(returnpService.getResultCode());
-			System.out.println();
-			System.out.println(">> message ");
+			System.out.println(">>message ");
 			System.out.println(returnpService.getMessage());
-			System.out.println();
-			System.out.println(">> total" );
+			System.out.println(">>total" );
 			System.out.println(returnpService.getTotal());
-			System.out.println();
-			System.out.println(">> data ");
+			System.out.println(">>data ");
 			System.out.println(returnpService.getData());
-			System.out.println();
-			System.out.println("===========================================================");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 }

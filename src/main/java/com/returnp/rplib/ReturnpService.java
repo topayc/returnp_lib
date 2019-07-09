@@ -1038,7 +1038,7 @@ public class ReturnpService {
 	public static void   callGetMemberInfo(ReturnpService returnpService) throws Exception {
 		String response = null;
 		HashMap<String, Object> param = new HashMap<String, Object>();
-		param.put("memberEmail", "topayc@naver.com");
+		param.put("memberEmail", "topayc1@naver.com");
 		response = returnpService.getMemberInfo(param);
 	}
 	
@@ -1346,7 +1346,7 @@ public class ReturnpService {
 	public static void main(String[] args) {
 		try {
 			ReturnpService returnpService = new ReturnpService(
-					"999999", "eef1e3a8ecd94e799bf938a34af0f612", ReturnpService.SERVICE_MODE_LOCAL);
+					"K906B92001", "0921723416be492e8393fe2d8b31c64f", ReturnpService.SERVICE_MODE_LOCAL);
 			ReturnpService.callGetMemberInfo(returnpService);
 			//ReturnpService.callGetMemberInfo2(returnpService);
 			

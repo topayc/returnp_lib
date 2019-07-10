@@ -35,6 +35,7 @@
  4.서비스 요청에 대한 ResultCode(응답 코드)
 
   100 : 일반적인 요청에 대한 처리 성공
+
   300 : 요청에 대해서 수행할수 없음, 비즈니스 로직 처리 오류
   301 : 잘못된 API key
   302 : 해당 이메일에 대한 회원이 존재하지 않음
@@ -43,10 +44,13 @@
   305 : 잘못된 가맹 고유 번호, 해당 고유번호의 가맹점이 존재 하지 않음
   306 : 이메일이 중복됨  (회원 가입시 반환될 수 있음)
   307 : 전화번호가 중복됨  (회원 가입시 반환될 수 있음)
+  309 : 존재하지 않는 추천인 이메일
   602 : 파라미터로 전달된 전화번호와 실제 디비의 전화번호가 일치하지 않음.
   611 : 존재하지 않는 결제 내역에 대한 취소 요청
   606 : 이미 적립 처리가 완료된 결제 내역
   619 : 등록되어 있지만 QR 적립이 가능한 가맹점이 아님
+
+
   500 : 서버 오류
  */
 
@@ -133,10 +137,15 @@ class ReturnpService {
         $param['afId'] = $this -> af_id;
         $curl_session = curl_init();
         curl_setopt($curl_session, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl_session, CURLOPT_URL, $this->get_service_root_url().$url);
+
+        /*
+            POST  전송시 배열 파라미터가 전달 되지 않는 경우가 있어서
+            다음과 같이 처리
+        */
+        curl_setopt($curl_session, CURLOPT_URL, $this->get_service_root_url().$url.'?'.http_build_query($param, '', '&'));
         curl_setopt($curl_session, CURLOPT_POST, 1);
         curl_setopt($curl_session, CURLOPT_POSTFIELDSIZE, 0);
-        curl_setopt($curl_session, CURLOPT_POSTFIELDS, $param);
+        //curl_setopt($curl_session, CURLOPT_POSTFIELDS, $param);
         $response = curl_exec($curl_session);
         curl_close ($curl_session);
         $this -> decode($response);
@@ -154,7 +163,6 @@ class ReturnpService {
     private function aes_256_decode($data){
        $iv  = "2H4+HRD0Z6g1qmRw";
        $re = openssl_decrypt(base64_decode($data), "aes-256-cbc", $this ->api_key, true ,$iv);
-       echo "복호화 데이타 : ". $re;
        return $re;
     }
 
@@ -203,7 +211,15 @@ class ReturnpService {
      * @param $memberPassword2 두번째 비밀번호(앞으로 사용예약)
      * @param $recommenderEmail 추천인 이메일 , 없으면 널 값
      */
-    public function join($memberEmail, $memberName, $memberPhone, $memberPassword,$memberPassword2, $recommenderEmail, $joinRoute)  {
+    public function join(
+            $memberEmail,
+            $memberName,
+            $memberPhone,
+            $memberPassword,
+            $memberPassword2,
+            $recommenderEmail,
+            $joinRoute)  {
+
         $param['memberEmail'] = $memberEmail;
         $param['memberName'] = $memberName;
         $param['memberPhone'] = $memberPhone;
@@ -212,7 +228,7 @@ class ReturnpService {
         $param['country'] = "KR";
         $param['joinRoute'] = $joinRoute;
         if ($recommenderEmail) {
-            $param['recommenderEmail'] = "recommenderEmail";
+            $param['recommenderEmail'] = $recommenderEmail;
         }
         $result = $this -> post($this ->ENDPOINT_JOIN_UP, $param);
         return $result;
@@ -227,14 +243,21 @@ class ReturnpService {
      * @param $paymentApprovalDateTime  결제 시간(2019-03-01 10:10:10  형식) "yyyy-MM-dd hh:mm:ss" 형식
      * @param $paymentApprovalNumber 결제 번호
      */
-    public function execute_accumualte($memberEmail, $memberPhone, $paymentApprovalAmount, $paymentApprovalStatus,  $paymentApprovalDateTime,$paymentApprovalNumber)  {
+    public function execute_accumualte(
+            $memberEmail,
+            $memberPhone,
+            $paymentApprovalAmount,
+            $paymentApprovalStatus,
+            $paymentApprovalDateTime,
+            $paymentApprovalNumber)  {
+
         $param['paymentApprovalAmount'] = $paymentApprovalAmount;
         $param['paymentApprovalStatus'] = $paymentApprovalStatus;
         $param['paymentApprovalDateTime'] = $paymentApprovalDateTime;
         $param['paymentApprovalNumber'] = $paymentApprovalNumber;
         $param['memberEmail'] = $memberEmail;
         $param['memberPhone'] = $memberPhone;
-        $result = $this -> get($this ->ENDPOINT_HANDLE_ACCUMULATE, $param);
+        $result = $this -> post($this ->ENDPOINT_HANDLE_ACCUMULATE, $param);
         return $result;
     }
 
@@ -256,7 +279,11 @@ class ReturnpService {
 $returnpService = new ReturnpService("22222222", "2eff27c0760540ca98a5463dcb07cb3b",ReturnpService::$SERVICE_MODE_LOCAL);
 //$returnpService-> getMemberInfo("topayc1@naver.com");
 //$returnpService-> is_registered("phone", "0108822747");
-$returnpService-> get_my_point_infos("topayc1@naver.com", "01088227467");
+//$returnpService-> get_my_point_infos("topayc1@naver.com", "01088227467");
+
+//$returnpService-> execute_accumualte("topayc1@naver.com", "01088227467", "909090909", "1", "2019-03-01 10:10:10", "44444444");
+
+$returnpService -> join("topayc@daum.com", "김철수", "01099989121", "a9831000", "a9831000","topayc876545@naver.com", "www.naver.com");
 
 if ($returnpService->get_response_code() == ReturnpService::$RESPONSE_OK) {
     echo '-----------------------------------------------------------';
@@ -278,6 +305,10 @@ if ($returnpService->get_response_code() == ReturnpService::$RESPONSE_OK) {
     echo '-----------------------------------------------------------';
     printf("\n");
     echo $returnpService-> get_data();
+}else {
+   echo $returnpService-> get_response_code();
+   printf("\n");
+   echo $returnpService-> get_message();
 }
 
  ?>

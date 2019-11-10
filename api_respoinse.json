@@ -143,7 +143,7 @@ resultCode 100  :  조회 성공
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## returnpService.join(String memberEmail, String memberName, String memberPhone, String memberPassword,String memberPassword2, String recommenderEmai, String joinRoute);
-리턴포인트 회원 가입 요청 
+R 포인트 회원 가입 요청 
 
  * @param memberEmail 회원 이메일
  * @param memberName 회원 이름

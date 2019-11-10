@@ -26,8 +26,8 @@ import org.json.simple.parser.ParseException;
  * 
  * <b><h1>생성자 인자 설명</h1></b>
  * 
- * 1.쇼핑몰 고유 번호 : 리턴포인트에서 생성 후 제공</br>
- * 2.API KEY : 리턴포인트에서 생성, 제공하며, 응답 데이타의 암, 복호화 및 클라이언트 식별에 사용</br>
+ * 1.쇼핑몰 고유 번호 : R 포인트 에서 생성 후 제공</br>
+ * 2.API KEY : R 포인트  에서 생성, 제공하며, 응답 데이타의 암, 복호화 및 클라이언트 식별에 사용</br>
  * 3.서비스 실행 모드 </br>
  *  - ReturnpService.SERVICE_MODE_DEVELOPE  :  <b>HTTP 로 개발 서버 접속</b></br>
  *  - ReturnpService.SERVICE_MODE_PRODUCT   :  <b>HTTPS 로 실제 운영 서버 접속</b> </br>
@@ -61,9 +61,13 @@ import org.json.simple.parser.ParseException;
  * 306 : 이메일이 중복됨  (회원 가입시 반환될 수 있음)
  * 307 : 전화번호가 중복됨  (회원 가입시 반환될 수 있음)
  * 602 : 파라미터로 전달된 전화번호와 실제 디비의 전화번호가 일치하지 않음. 
- * 611 : 존재하지 않는 결제 내역에 대한 취소 요청 
  * 606 : 이미 적립 처리가 완료된 결제 내역
+ * 610 : 승인 상태 코드가 옳바르지 않음 (0 : 승인 ,  1: 승인 취소 , 이외에 r값은 610 코드 반환)
+ * 611 : 존재하지 않는 결제 내역에 대한 취소 요청 
  * 619 : 등록되어 있지만 QR 적립이 가능한 가맹점이 아님
+ * 620 : 존재하지 않은 ID
+ * 621 : ID 는 존재하나 비밀번호가 옳바르지 않음 
+ * 623 : 존재하지 않는 사용자 
  * 
  * 
  * 500 : 서버 오류 </br>
@@ -95,6 +99,7 @@ public class BaseReturnpService {
 	private static String ENDPOINT_GET_MY_MEMBERS = "/pointback/v1/api/get_my_members";
 	private static String ENDPOINT_GET_MY_POINT_INFOS= "/pointback/v1/api/get_my_point_infos";
 	private static String ENDPOINT_GET_GPOINT_ACCUMULATE_HISTORY= "/pointback/v1/api/get_gpoint_accumulate_history";
+	private static String ENDPOINT_VALIDATE_MEMBER= "/pointback/v1/api/valid_member";
 	
 	public static String SERVICE_MODE_LOCAL = "LOCAL";
 	public static String SERVICE_MODE_DEVLOPEMENT = "DEVELOPEMENT";
@@ -129,8 +134,8 @@ public class BaseReturnpService {
 	
 	/**
 	 * 생성자
-	 * @param afId  리턴포인트에서 생성해서 제공하는 고유 번호
-	 * @param apiKey 리턴포인트에서 생성해서 제공하는 Api key (암복호화와 및 클라이언트 식별에 사용)
+	 * @param afId  R 포인트에서 생성해서 제공하는 고유 번호
+	 * @param apiKey R 포인트 에서 생성해서 제공하는 Api key (암복호화와 및 클라이언트 식별에 사용)
 	 * @param mode  실행 모드 DEVELOPEMENT : 개발 서버 연동, PRODUCT: 실제 운영 서버 연동 
 	 * 개발시에는 DEVELOPEMENT 로 테스트를 하고, 실제 배포시에는 PRODUCT로 하여 객체 생성
 	 */
@@ -537,6 +542,11 @@ public class BaseReturnpService {
 		return result;
 	}
 	
+	private String validateMember(HashMap<String, Object> params) throws Exception {
+		String result = this.httpGet(BaseReturnpService.ENDPOINT_VALIDATE_MEMBER,params);
+		return result;
+	}
+	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// 이후 메서드는 위와 동일한 기능을 하되, 매개 변수 인자를 맵 형태가 아닌, 일반 인자의 형식으로 호출함 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -659,7 +669,21 @@ public class BaseReturnpService {
         return null;
     }
 
-
+    public String validateMember(String memberEmail, String memberPassword) {
+    	//System.out.println("#### memberJoin");
+        try {
+            String response = null;
+            HashMap<String, Object> param = new HashMap<String, Object>();
+            param.put("memberEmail",  memberEmail);
+            param.put("memberPassword", memberPassword);
+            response = this.validateMember(param);
+            return response;
+        } catch (Exception e) {
+            //System.out.println("*** IO 익셉션 발생");
+            e.printStackTrace();
+        } 
+        return null;
+    }
     
     public String getContent() {
     	return this.result.toString();

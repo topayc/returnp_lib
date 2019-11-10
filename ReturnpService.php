@@ -9,8 +9,8 @@
 
  2.생성자 인자 설명
 
- 쇼핑몰 고유 번호 : 리턴포인트에서 생성 후 제공</br>
- API KEY : 리턴포인트에서 생성, 제공하며, 응답 데이타의 암, 복호화 및 클라이언트 식별에 사용</br>
+ 쇼핑몰 고유 번호 : R 포인트에서 생성 후 제공</br>
+ API KEY : R 포인트 에서 생성, 제공하며, 응답 데이타의 암, 복호화 및 클라이언트 식별에 사용</br>
  서비스 실행 모드 </br>
    - ReturnpService.SERVICE_MODE_DEVELOPE  :  <b>HTTP 로 개발 서버 접속</b></br>
    - ReturnpService.SERVICE_MODE_PRODUCT   :  <b>HTTPS 로 실제 운영 서버 접속</b> </br>
@@ -111,7 +111,6 @@ class ReturnpService {
             $rootUrl =  $this->SERVICE_URL_LOCAL;
         } else if ($this-> service_mode == self::$SERVICE_MODE_PRODUCT) {
             $rootUrl = $this->SERVICE_URL_PRODUCT;
-
         } else if ($this-> service_mode == self::$SERVICE_MODE_DEVLOPEMENT) {
             $rootUrl = $this->SERVICE_URL_DEVLOPEMENT;
         } else {
@@ -144,7 +143,7 @@ class ReturnpService {
         */
         curl_setopt($curl_session, CURLOPT_URL, $this->get_service_root_url().$url.'?'.http_build_query($param, '', '&'));
         curl_setopt($curl_session, CURLOPT_POST, 1);
-        curl_setopt($curl_session, CURLOPT_POSTFIELDSIZE, 0);
+        //curl_setopt($curl_session, CURLOPT_POSTFIELDSIZE, 0);
         //curl_setopt($curl_session, CURLOPT_POSTFIELDS, $param);
         $response = curl_exec($curl_session);
         curl_close ($curl_session);
@@ -166,15 +165,13 @@ class ReturnpService {
        return $re;
     }
 
-
-    public function get_content_str(){return json_decode($this -> result);}
+    public function get_content_str(){return json_encode($this -> result);}
     public function get_content_json(){return $this -> result;}
     public function get_result_code(){return $this -> result['resultCode'];}
-    public function get_data(){return $this -> result['data'];}
     public function get_message(){return $this -> result['message'];}
     public function get_total(){return $this -> result['total'];}
     public function get_response_code(){return $this -> result['responseCode'];}
-
+    public function get_data($is_json = false){return $is_json? json_decode($this -> result['data'], true) : $this -> result['data'];}
 
     /**
      * 회원 정보 가져오기
@@ -219,7 +216,6 @@ class ReturnpService {
             $memberPassword2,
             $recommenderEmail,
             $joinRoute)  {
-
         $param['memberEmail'] = $memberEmail;
         $param['memberName'] = $memberName;
         $param['memberPhone'] = $memberPhone;
@@ -250,7 +246,6 @@ class ReturnpService {
             $paymentApprovalStatus,
             $paymentApprovalDateTime,
             $paymentApprovalNumber)  {
-
         $param['paymentApprovalAmount'] = $paymentApprovalAmount;
         $param['paymentApprovalStatus'] = $paymentApprovalStatus;
         $param['paymentApprovalDateTime'] = $paymentApprovalDateTime;
@@ -277,13 +272,11 @@ class ReturnpService {
 }
 
 $returnpService = new ReturnpService("22222222", "2eff27c0760540ca98a5463dcb07cb3b",ReturnpService::$SERVICE_MODE_LOCAL);
-//$returnpService-> getMemberInfo("topayc1@naver.com");
+//$returnpService-> getMemberInfo("topayc1@naver.com","01088227467");
 //$returnpService-> is_registered("phone", "0108822747");
-//$returnpService-> get_my_point_infos("topayc1@naver.com", "01088227467");
-
+$returnpService-> get_my_point_infos("topayc1@naver.com", "01088227467");
 //$returnpService-> execute_accumualte("topayc1@naver.com", "01088227467", "909090909", "1", "2019-03-01 10:10:10", "44444444");
-
-$returnpService -> join("topayc@daum.com", "김철수", "01099989121", "a9831000", "a9831000","topayc876545@naver.com", "www.naver.com");
+//$returnpService -> join("topayc@daum.com", "", "01099989121", "a9831000", "a9831000","topayc876545@naver.com", "www.naver.com");
 
 if ($returnpService->get_response_code() == ReturnpService::$RESPONSE_OK) {
     echo '-----------------------------------------------------------';
@@ -310,5 +303,4 @@ if ($returnpService->get_response_code() == ReturnpService::$RESPONSE_OK) {
    printf("\n");
    echo $returnpService-> get_message();
 }
-
  ?>
